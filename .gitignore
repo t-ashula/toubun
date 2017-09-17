@@ -1,0 +1,8 @@
+# Added from https://raw.githubusercontent.com/github/gitignore/master/Go.gitignore
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.glide/
