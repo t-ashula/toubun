@@ -8,3 +8,5 @@
 .glide/
 vendor/
 toubun
+tmp/
+!tmp/.keep
