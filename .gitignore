@@ -6,3 +6,5 @@
 *.test
 *.out
 .glide/
+vendor/
+toubun
