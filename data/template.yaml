@@ -1,0 +1,19 @@
+fetch:
+  module: 'git'
+  config:
+    url: 'https://github.com/t-ashula/toubun.git'
+    base_remote_branch: 'master'
+    depth: 1
+
+update:
+  module: 'glide'
+  config:
+
+publish:
+  module: 'github-pr'
+  config:
+    committer_name: toubun
+    committer_email: toubun@example.com
+    pr_title: ':rocket: update dep libs '
+    pr_body: ':rocket:'
+    pr_base: 'master'

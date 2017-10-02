@@ -1,0 +1,12 @@
+fetch:
+  module: 'github'
+  config:
+    depth: 1
+update:
+  module: 'glide'
+  config:
+    verbose: 'quiet'
+publish:
+  module: 'github-pr'
+  config:
+    url: 'https://github.com/t-ashula/toubub/'
