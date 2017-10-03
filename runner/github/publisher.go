@@ -20,6 +20,7 @@ type ghpConfig struct {
 	prTitle       string
 	prBody        string
 	prBaseBranch  string
+	apiEndPoint   string
 }
 
 func init() {
@@ -73,12 +74,14 @@ func convertPublisherConfig(c *k.ModuleConfig) *ghpConfig {
 	title, _ := k.GetConfigStringValue(c, "pr_title", "")
 	body, _ := k.GetConfigStringValue(c, "pr_body", "")
 	branch, _ := k.GetConfigStringValue(c, "pr_base_branch", "")
+	api, _ := k.GetConfigStringValue(c, "api_endpoint", "")
 	ghpc := &ghpConfig{
 		committerName: name,
 		committerMail: mail,
 		prTitle:       title,
 		prBody:        body,
 		prBaseBranch:  branch,
+		apiEndPoint:   api,
 	}
 	return ghpc
 }
