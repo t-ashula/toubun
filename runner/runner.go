@@ -16,6 +16,42 @@ type Runner interface {
 // Creater is function that creat Runner
 type Creater func(c *k.ModuleConfig) Runner
 
+func NewFetcher(c *k.ModuleConfig) Runner {
+	return newRunner(fetcherType, c)
+}
+
+func RegisterFetcher(name string, creater Creater) error {
+	return register(fetcherType, name, creater)
+}
+
+func UnregisterFetcher(name string) {
+	unregister(fetcherType, name)
+}
+
+func NewUpdater(c *k.ModuleConfig) Runner {
+	return newRunner(updaterType, c)
+}
+
+func RegisterUpdater(name string, creator Creater) error {
+	return register(updaterType, name, creator)
+}
+
+func UnregisterUpdater(name string) {
+	unregister(updaterType, name)
+}
+
+func NewPublisher(c *k.ModuleConfig) Runner {
+	return newRunner(publisherType, c)
+}
+
+func RegisterPublisher(name string, creator Creater) error {
+	return register(publisherType, name, creator)
+}
+
+func UnregisterPublisher(name string) {
+	unregister(publisherType, name)
+}
+
 const (
 	fetcherType   = "fetcher"
 	updaterType   = "updater"
