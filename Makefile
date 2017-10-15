@@ -7,11 +7,12 @@ LDFLAGS  := "-X github.com/t-ashula/toubun/core.Version=$(VERSION)"
 
 glide:
 ifeq ($(shell command -v glide 2> /dev/null),)
-	go get -u -d github.com/Masterminds/glide
+	# go get -u -d github.com/Masterminds/glide
+	curl https://glide.sh/get | sh
 endif
 
 deps: glide
-	$(GOPATH)/bin/glide install
+	glide install
 
 $(TARGET): $(SRCS)
 	go build -ldflags $(LDFLAGS) -o $(TARGET)
