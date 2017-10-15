@@ -1,12 +1,43 @@
-hash: b53371f6965a4d56e5f42dd4e3ac253ec164f472b4e57c4a7aaaa69dac825df8
-updated: 2017-09-18T22:20:28.914743645+09:00
+hash: c44f9e1af342e8687204bfb52ac2b961a7c44b0a9d218d8825e2ad92ca2ca0f2
+updated: 2017-10-14T11:28:29.74091055+09:00
 imports:
+- name: github.com/golang/protobuf
+  version: 130e6b02ab059e7b717a096f397c5b60111cae74
+  subpackages:
+  - proto
+- name: github.com/google/go-github
+  version: 99750d1edbfc12d104a3f9d4ff6960e444d37058
+  subpackages:
+  - github
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/spf13/cobra
   version: 8c6fa02d2225de0f9bdcb7ca912556f68d172d8c
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+- name: golang.org/x/net
+  version: a04bdaca5b32abe1c069418fb7088ae607de5bd0
+  subpackages:
+  - context
+  - context/ctxhttp
+- name: golang.org/x/oauth2
+  version: bb50c06baba3d0c76f9d125c0719093e315b5b44
+  subpackages:
+  - internal
+- name: google.golang.org/appengine
+  version: a2e0dc829727a4f957a7428b1f322805cfc1f362
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports: []

@@ -1,13 +1,22 @@
-package github
+package gh
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"net/url"
+	"os/exec"
+	"strings"
+	"time"
 
+	"golang.org/x/oauth2"
+
+	"github.com/google/go-github/github"
 	k "github.com/t-ashula/toubun/core"
 	"github.com/t-ashula/toubun/runner"
 )
 
-const publisherName = "github"
+const publisherName = "github:pr"
 
 type githubPublisher struct {
 	config         *ghpConfig
@@ -17,6 +26,7 @@ type githubPublisher struct {
 type ghpConfig struct {
 	committerName string
 	committerMail string
+	commitMessage string
 	prTitle       string
 	prBody        string
 	prBaseBranch  string
@@ -61,7 +71,117 @@ func (p *githubPublisher) ValidateConfig() error {
 }
 
 func (p *githubPublisher) Run(re k.RunEnv) error {
+	log.Printf("publisher:[%s]:start\n", re.CurrentWorkDir())
+
+	// prepare
+	token, ok := re.EnvVars()[githubTokenEnvName]
+	if !ok || token == "" {
+		return fmt.Errorf("set github oauth2 token to env-var:%s", githubTokenEnvName)
+	}
+
+	if err := exec.Command("git", "config", "user.name", p.config.committerName).Run(); err != nil {
+		return err
+	}
+
+	if err := exec.Command("git", "config", "user.email", p.config.committerMail).Run(); err != nil {
+		return err
+	}
+
+	// changed into new branch
+	log.Printf("publisher:[%s]:git checkout\n", re.CurrentWorkDir())
+	branchName := fmt.Sprintf("toubun/upgrade-%d", time.Now().UnixNano())
+	if err := exec.Command("git", "checkout", "-b", branchName).Run(); err != nil {
+		return err
+	}
+
+	// make commit
+	log.Printf("publisher:[%s]:git commit\n", re.CurrentWorkDir())
+	if err := exec.Command("git", "commit", "-am", p.config.commitMessage).Run(); err != nil {
+		return err
+	}
+
+	// push
+	owner, repo := p.guessRepository()
+	ghHost := p.guessHost()
+	repositoryURL := fmt.Sprintf("https://%s:x-oauth-basic@%s/%s/%s", token, ghHost, owner, repo)
+	log.Printf("publisher:[%s]:git push %s %s\n", re.CurrentWorkDir(), repositoryURL, branchName)
+	if err := exec.Command("git", "push", repositoryURL, branchName).Run(); err != nil {
+		return err
+	}
+
+	// send pull req
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+	tc := oauth2.NewClient(ctx, ts)
+	ghc := github.NewClient(tc)
+	pull := &github.NewPullRequest{
+		Title: github.String(p.config.prTitle),
+		Head:  github.String(branchName),
+		Base:  github.String(p.config.prBaseBranch),
+		Body:  github.String(p.config.prBody),
+	}
+
+	log.Printf("publisher:[%s]:create pr %s %s\n", re.CurrentWorkDir(), owner, repo)
+	_, _, err := ghc.PullRequests.Create(ctx, owner, repo, pull)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("publisher:[%s]:done\n", re.CurrentWorkDir())
 	return nil
+}
+
+func (p *githubPublisher) guessRepository() (owner string, repo string) {
+	res, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
+	if err != nil || len(res) == 0 {
+		return
+	}
+
+	remoteURL := string(res)
+	remoteURL = strings.TrimSpace(remoteURL)
+
+	// git@github.com:t-ashula/toubun.git
+	if strings.HasPrefix(remoteURL, "git") {
+		t1 := strings.SplitN(remoteURL, ":", 2)
+		t2 := strings.SplitN(t1[1], "/", 2)
+		owner = t2[0]
+		repo = t2[1]
+		repo = strings.TrimSuffix(repo, ".git")
+		log.Printf("guess owner/repo:<%s>:<%s><%s>\n", remoteURL, owner, repo)
+		return
+	}
+
+	// https://github.com/t-ashula/toubun.git
+	if strings.HasPrefix(remoteURL, "http") {
+		parts := strings.Split(remoteURL, "/")
+		l := len(parts)
+		if l < 2 {
+			return
+		}
+		owner = parts[l-1-1]
+		repo = parts[l-1-0]
+		repo = strings.TrimSuffix(repo, ".git")
+		log.Printf("guess owner/repo:<%s>:<%s><%s>\n", remoteURL, owner, repo)
+		return
+	}
+
+	// can't detect
+	owner, repo = "", ""
+	return
+}
+
+func (p *githubPublisher) guessHost() string {
+	endPoint := p.config.apiEndPoint
+	if endPoint == "" {
+		return "github.com"
+	}
+
+	u, _ := url.Parse(endPoint)
+	if u.Host == "api.github.com" {
+		return "github.com"
+	}
+
+	return u.Host
 }
 
 func convertPublisherConfig(c *k.ModuleConfig) *ghpConfig {
@@ -71,6 +191,7 @@ func convertPublisherConfig(c *k.ModuleConfig) *ghpConfig {
 
 	name, _ := k.GetConfigStringValue(c, "committer_name", "")
 	mail, _ := k.GetConfigStringValue(c, "committer_mail", "")
+	msg, _ := k.GetConfigStringValue(c, "commit_message", "")
 	title, _ := k.GetConfigStringValue(c, "pr_title", "")
 	body, _ := k.GetConfigStringValue(c, "pr_body", "")
 	branch, _ := k.GetConfigStringValue(c, "pr_base_branch", "")
@@ -78,6 +199,7 @@ func convertPublisherConfig(c *k.ModuleConfig) *ghpConfig {
 	ghpc := &ghpConfig{
 		committerName: name,
 		committerMail: mail,
+		commitMessage: msg,
 		prTitle:       title,
 		prBody:        body,
 		prBaseBranch:  branch,

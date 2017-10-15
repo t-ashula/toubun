@@ -12,8 +12,10 @@ update:
 publish:
   module: 'github-pr'
   config:
+    api_endpoint: https://api.github.com/
     committer_name: toubun
-    committer_email: toubun@example.com
+    committer_mail: toubun@example.com
+    commit_message: ':up: update dependencies'
     pr_title: ':rocket: update dep libs '
     pr_body: ':rocket:'
     pr_base: 'master'

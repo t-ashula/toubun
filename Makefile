@@ -1,36 +1,40 @@
-TARGET  := toubun
-DEBUG_FLAG = $(if $(DEBUG),-debug)
-VERSION ?= $(shell git describe --tags)
-SRCS := *.go core/*.go cmd/*.go runner/*.go
+TARGET   := toubun
+VERSION  := v0.1.0
+REVISION := $(shell git rev-parse --short HEAD)
+
+SRCS     := *.go core/*.go cmd/*.go runner/*.go runner/**/*.go
+LDFLAGS  := "-X github.com/t-ashula/toubun/core.Version=$(VERSION)"
+
 has_glide := $(shell command -v glide 2> /dev/null)
 
-
-$(TARGET): $(SRCS)
-	go build -ldflags "-X github.com/t-ashula/toubun/core.Version=$(VERSION)" -o $(TARGET) .
-
-all: $(TARGET)
-
-install-deps:
+glide:
 ifeq ('', $(has_glide))
+	# curl https://glide.sh/get | sh
 	go get -u -d github.com/Masterminds/glide
 endif
-	glide -q install
-	glide -q up
+
+deps: glide
+	glide install
+
+$(TARGET): $(SRCS)
+	go build -ldflags $(LDFLAGS) -o $(TARGET)
+
+all: $(TARGET)
 
 test:
 	go test -cover $$(glide nv)
 
 test-cover:
 	echo 'mode: atomic' > cover-all.out
-	$(foreach pkg, $(shell go list ./...), \
-		go test -coverprofile=cover.out -covermode=atomic $(pkg); \
+	$(foreach pkg, $(shell glide nv), \
+		go test -coverprofile=cover.out -covermode=atomic -v $(pkg); \
 		tail -n +2 cover.out >> cover-all.out; \
 	)
 	go tool cover -func=cover-all.out
 
 clean:
-	rm -f $(TARGET) cover-all.out cover.out
+	rm -rf $(TARGET) cover-all.out cover.out bin vendor
 
 force: clean all
 
-.PHONY: force clean test install-deps all
+.PHONY: force clean test deps glide

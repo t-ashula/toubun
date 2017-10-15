@@ -1,4 +1,4 @@
-package github
+package gh
 
 import (
 	"fmt"
@@ -78,7 +78,7 @@ func TestFetcherRun(t *testing.T) {
 
 }
 
-func TestFetcherBaseURL(t *testing.T) {
+func TestFetcherAuthedRespositoryURL(t *testing.T) {
 	yml := `
 module: github
 config:
@@ -96,7 +96,7 @@ config:
 	}
 
 	re := k.NewRunEnv()
-	uri, err := f.baseURL(re)
+	uri, err := f.authedRepositoryURL(re)
 	if err != nil {
 		t.Fatal("base url should no error for valid config")
 	}
@@ -111,7 +111,7 @@ config:
 	token := strconv.FormatInt(time.Now().UnixNano(), 36)
 	os.Setenv(githubTokenEnvName, token)
 	f2 := newGithubFetcher(c).(*githubFetcher)
-	uri, err = f2.baseURL(re)
+	uri, err = f2.authedRepositoryURL(re)
 	if err != nil {
 		t.Fatal("base url should no error for valid config")
 	}

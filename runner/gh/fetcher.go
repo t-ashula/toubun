@@ -1,7 +1,9 @@
-package github
+package gh
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/url"
 	"os/exec"
 
@@ -26,7 +28,10 @@ type ghfConfig struct {
 }
 
 func init() {
-	runner.RegisterFetcher(fetcherName, newGithubFetcher)
+	err := runner.RegisterFetcher(fetcherName, newGithubFetcher)
+	if err != nil {
+		log.Printf("gh/fetcher registration failed; %s", err)
+	}
 }
 
 func newGithubFetcher(c *k.ModuleConfig) runner.Runner {
@@ -76,10 +81,15 @@ func (f *githubFetcher) Run(re k.RunEnv) error {
 		}
 	}
 
-	baseURL, err := f.baseURL(re)
+	repositoryURL, err := f.authedRepositoryURL(re)
 	if err != nil {
+		log.Printf("authedRepositoryURL failed\n")
 		return err
 	}
+
+	cd := re.CurrentWorkDir()
+	cloneDir, _ := ioutil.TempDir(cd, "toubun")
+	re.ChangeWorkDir(cloneDir, true)
 
 	// TODO: use go-git package?
 	git := "git"
@@ -87,18 +97,20 @@ func (f *githubFetcher) Run(re k.RunEnv) error {
 	if f.config.depth > 0 {
 		args = append(args, "--depth", fmt.Sprintf("%d", f.config.depth))
 	}
-	args = append(args, baseURL)
-	args = append(args, re.CurrentWorkDir())
+	args = append(args, repositoryURL)
+	args = append(args, cloneDir)
 
 	cmd := exec.Command(git, args...)
 	err = cmd.Run()
 	if err != nil {
+		log.Printf("failed;[%s]:git %+v\n", re.CurrentWorkDir(), args)
 		return err
 	}
+	log.Printf("success;[%s]:git %+v\n", re.CurrentWorkDir(), args)
 	return nil
 }
 
-func (f *githubFetcher) baseURL(re k.RunEnv) (string, error) {
+func (f *githubFetcher) authedRepositoryURL(re k.RunEnv) (string, error) {
 	u, err := url.Parse(f.config.url)
 	if err != nil {
 		return "", err

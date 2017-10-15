@@ -2,6 +2,10 @@ package glide
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
 
 	k "github.com/t-ashula/toubun/core"
 	"github.com/t-ashula/toubun/runner"
@@ -38,7 +42,18 @@ func (u *glideUpdater) ValidateConfig() error {
 }
 
 func (u *glideUpdater) Run(re k.RunEnv) error {
-	return nil
+	lock := filepath.Join(re.CurrentWorkDir(), "glide.lock")
+	_, err := os.Stat(lock)
+	if err == nil {
+		os.Remove(lock)
+	}
+	err = exec.Command("glide", "up").Run()
+	if err != nil {
+		log.Printf("failed;[%s]:glide up\n", re.CurrentWorkDir())
+		return err
+	}
+	log.Printf("success;[%s]:glide up\n", re.CurrentWorkDir())
+	return err
 }
 
 func convertUpdaterConfig(c *k.ModuleConfig) *guConfig {

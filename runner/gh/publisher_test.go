@@ -1,4 +1,4 @@
-package github
+package gh
 
 import (
 	"testing"
@@ -7,10 +7,10 @@ import (
 )
 
 func TestUpdaterName(t *testing.T) {
-	c := &k.ModuleConfig{Module: "github"}
+	c := &k.ModuleConfig{Module: "github:pr"}
 	p := newGithubPublisher(c)
-	if p.Name() != "github" {
-		t.Fatalf("name should 'github'")
+	if p.Name() != "github:pr" {
+		t.Fatalf("name should 'github:pr'")
 	}
 }
 

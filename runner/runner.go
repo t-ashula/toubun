@@ -58,6 +58,9 @@ const (
 	publisherType = "publisher"
 )
 
+// fetcher   -> githubFetcher   -> newGithubFetcher
+// updater   -> glideUpdaer     -> newGlideUpdater
+// publisher -> githubPublisher -> newGithubPublisher
 var runners map[string]map[string]Creater
 var runnerTypes = []string{fetcherType, updaterType, publisherType}
 

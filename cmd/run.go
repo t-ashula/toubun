@@ -13,40 +13,7 @@ import (
 var runCommand = &cobra.Command{
 	Use:   "run",
 	Short: "run toubun",
-	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := loadConfig()
-		if err != nil {
-			log.Printf("load config failed; '%s'\n", err)
-			return
-		}
-		log.Printf("config:%+v\n", cfg)
-
-		re, err := prepareRunEnv()
-		if err != nil {
-			fmt.Printf("prepare env failed; '%s'\n", err)
-			return
-		}
-
-		rs, err := makeRunner(cfg)
-		if err != nil {
-			fmt.Printf("make runner faild; '%s'\n", err)
-			return
-		}
-
-		err = validateConfig(rs)
-		if err != nil {
-			fmt.Printf("validate config faild; '%s'\n", err)
-			return
-		}
-
-		err = run(re, rs)
-		if err != nil {
-			fmt.Printf("run faild; '%s'\n", err)
-			return
-		}
-
-		cleanRunEnv(re)
-	},
+	Run:   runCore,
 }
 
 var configPath string
@@ -54,6 +21,44 @@ var configPath string
 func init() {
 	runCommand.Flags().StringVarP(&configPath, "config", "c", ".toubun.yml", "path to config file")
 	RootCommand.AddCommand(runCommand)
+}
+
+func runCore(cmd *cobra.Command, args []string) {
+	cfg, err := loadConfig()
+	if err != nil {
+		log.Printf("load config failed; %s\n", err)
+		return
+	}
+	log.Printf("config:%+v\n", cfg)
+
+	re, err := prepareRunEnv()
+	if err != nil {
+		log.Printf("prepare env failed; %s\n", err)
+		return
+	}
+	log.Printf("RunEnv Prepared\n")
+
+	rs, err := makeRunner(cfg)
+	if err != nil {
+		log.Printf("make runner faild; %s\n", err)
+		return
+	}
+	log.Printf("Runner Created %v\n", rs)
+
+	err = validateConfig(rs)
+	if err != nil {
+		log.Printf("validate config faild; %s\n", err)
+		return
+	}
+	log.Printf("Config validated\n")
+
+	err = run(re, rs)
+	if err != nil {
+		log.Printf("run faild; %s\n", err)
+		return
+	}
+
+	cleanRunEnv(re)
 }
 
 func loadConfig() (*k.AppConfig, error) {
@@ -81,27 +86,29 @@ func prepareRunEnv() (k.RunEnv, error) {
 
 func makeRunner(cfg *k.AppConfig) ([]runner.Runner, error) {
 	f := runner.NewFetcher(&cfg.Fetch)
-	if f != nil {
-		return nil, fmt.Errorf("no fetcher matched.%s\n", cfg.Fetch.Module)
+	if f == nil {
+		log.Printf("no fetcher <%s> matched.\n", cfg.Fetch.Module)
+		return nil, fmt.Errorf("no fetcher <%s> matched", cfg.Fetch.Module)
 	}
 
 	u := runner.NewUpdater(&cfg.Update)
-	if u != nil {
-		fmt.Printf("no fetcher matched.%s\n", cfg.Fetch.Module)
-		return nil, fmt.Errorf("no fetcher matched.%s\n", cfg.Fetch.Module)
+	if u == nil {
+		log.Printf("no updater <%s> matched.\n", cfg.Update.Module)
+		return nil, fmt.Errorf("no fetcher <%s> matched", cfg.Update.Module)
 	}
 
-	p := runner.NewPublisher(&cfg.Update)
-	if f != nil {
-		fmt.Printf("no fetcher matched.%s\n", cfg.Fetch.Module)
-		return nil, fmt.Errorf("no fetcher matched.%s\n", cfg.Fetch.Module)
+	p := runner.NewPublisher(&cfg.Publish)
+	if p == nil {
+		log.Printf("no publisher <%s> matched.\n", cfg.Publish.Module)
+		return nil, fmt.Errorf("no fetcher <%s> matched", cfg.Publish.Module)
 	}
 	return []runner.Runner{f, u, p}, nil
 }
 
-func validateConfig(rs []runner.Runner) error {
-	for _, r := range rs {
+func validateConfig(runs []runner.Runner) error {
+	for _, r := range runs {
 		if err := r.ValidateConfig(); err != nil {
+			log.Printf("%s validation failed %v", r.Name(), err)
 			return err
 		}
 	}
@@ -110,6 +117,7 @@ func validateConfig(rs []runner.Runner) error {
 
 func run(re k.RunEnv, rs []runner.Runner) error {
 	for _, r := range rs {
+		log.Printf("%s:run\n", r.Name())
 		if err := r.Run(re); err != nil {
 			return err
 		}
