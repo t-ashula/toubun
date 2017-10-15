@@ -13,7 +13,7 @@ publish:
   module: 'github:pr'
   config:
     committer_name: toubun
-    committer_mail: t.ashula+toubun@gmail,com
+    committer_mail: t.ashula+toubun@gmail.com
     commit_message: ':up: update dependencies'
     pr_title: ':rocket: update dep libs '
     pr_body: ':rocket:'
