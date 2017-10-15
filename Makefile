@@ -11,7 +11,7 @@ ifeq ($(shell command -v glide 2> /dev/null),)
 endif
 
 deps: glide
-	glide install
+	$(GOPATH)/bin/glide install
 
 $(TARGET): $(SRCS)
 	go build -ldflags $(LDFLAGS) -o $(TARGET)
