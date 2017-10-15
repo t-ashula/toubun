@@ -5,11 +5,8 @@ REVISION := $(shell git rev-parse --short HEAD)
 SRCS     := *.go core/*.go cmd/*.go runner/*.go runner/**/*.go
 LDFLAGS  := "-X github.com/t-ashula/toubun/core.Version=$(VERSION)"
 
-has_glide := $(shell command -v glide 2> /dev/null)
-
 glide:
-ifeq ('', $(has_glide))
-	# curl https://glide.sh/get | sh
+ifeq ($(shell command -v glide 2> /dev/null),)
 	go get -u -d github.com/Masterminds/glide
 endif
 
