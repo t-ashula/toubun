@@ -114,6 +114,12 @@ func (p *githubPublisher) Run(re k.RunEnv) error {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(ctx, ts)
 	ghc := github.NewClient(tc)
+	if p.config.apiEndPoint != "" {
+		u, err := url.Parse(p.config.apiEndPoint)
+		if err == nil {
+			ghc.BaseURL = u
+		}
+	}
 	pull := &github.NewPullRequest{
 		Title: github.String(p.config.prTitle),
 		Head:  github.String(branchName),
