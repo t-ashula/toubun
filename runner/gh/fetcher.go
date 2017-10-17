@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/url"
 	"os/exec"
+	"path"
+	"strings"
 
 	k "github.com/t-ashula/toubun/core"
 	"github.com/t-ashula/toubun/runner"
@@ -87,9 +89,7 @@ func (f *githubFetcher) Run(re k.RunEnv) error {
 		return err
 	}
 
-	cd := re.CurrentWorkDir()
-	cloneDir, _ := ioutil.TempDir(cd, "toubun")
-	re.ChangeWorkDir(cloneDir, true)
+	cloneDir, _ := f.cloneDir(re)
 
 	// TODO: use go-git package?
 	git := "git"
@@ -106,8 +106,32 @@ func (f *githubFetcher) Run(re k.RunEnv) error {
 		log.Printf("failed;[%s]:git %+v\n", re.CurrentWorkDir(), args)
 		return err
 	}
+
+	re.ChangeWorkDir(cloneDir, true)
 	log.Printf("success;[%s]:git %+v\n", re.CurrentWorkDir(), args)
 	return nil
+}
+
+func (f *githubFetcher) cloneDir(re k.RunEnv) (string, error) {
+	cd := re.CurrentWorkDir()
+	base, err := ioutil.TempDir(cd, "toubun")
+	if err != nil {
+		return cd, err
+	}
+
+	u, err := url.Parse(f.config.url)
+	if err != nil {
+		return base, err
+	}
+
+	ps := strings.Split(u.Path, "/")
+	ps[len(ps)-1] = strings.TrimSuffix(ps[len(ps)-1], ".git")
+
+	ds := []string{base, "src", u.Hostname()}
+	ds = append(ds, ps...)
+	full := path.Join(ds...)
+
+	return full, nil
 }
 
 func (f *githubFetcher) authedRepositoryURL(re k.RunEnv) (string, error) {
