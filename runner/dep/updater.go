@@ -5,7 +5,9 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
+	"strings"
 
 	k "github.com/t-ashula/toubun/core"
 	"github.com/t-ashula/toubun/runner"
@@ -41,28 +43,36 @@ func (u *depUpdater) ValidateConfig() error {
 }
 
 func (u *depUpdater) Run(re k.RunEnv) error {
-	removeDeps(re)
-
-	err := exec.Command("dep", "ensure", "-update").Run()
-	if err != nil {
-		log.Printf("failed;[%s]:dep ensure\n", re.CurrentWorkDir())
-		return err
-	}
-	log.Printf("success;[%s]:dep ensure\n", re.CurrentWorkDir())
-	return nil
-}
-
-func removeDeps(re k.RunEnv) {
-	lock := filepath.Join(re.CurrentWorkDir(), "Gopkg.lock")
-	_, err := os.Stat(lock)
-	if err == nil {
-		os.Remove(lock)
-	}
 	vendor := filepath.Join(re.CurrentWorkDir(), "vendor")
-	_, err = os.Stat(vendor)
-	if err == nil {
+	if _, err := os.Stat(vendor); err == nil {
 		os.RemoveAll(vendor)
 	}
+
+	// try override GOPATH
+	// fetched at $TEMP/toubunXXX/src/github.com/owner/repo
+	cd := re.CurrentWorkDir()
+	ps := strings.Split(cd, "/")
+	srcIndex := len(ps) - 1
+	for i := range ps {
+		if ps[i] == "src" {
+			srcIndex = i
+			break
+		}
+	}
+	newPath := "/" + path.Join(ps[:srcIndex]...)
+	oldPath := os.Getenv("GOPATH")
+	defer os.Setenv("GOPATH", oldPath)
+	os.Setenv("GOPATH", newPath)
+
+	cmd := exec.Command("dep", "ensure", "-update")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("updater;[%s]:dep ensure failed;%s;%v\n", re.CurrentWorkDir(), out, err)
+		return err
+	}
+
+	log.Printf("updater;[%s]:dep ensure success;%s\n", re.CurrentWorkDir(), out)
+	return nil
 }
 
 func convertUpdaterConfig(c *k.ModuleConfig) *depConfig {
