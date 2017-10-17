@@ -3,15 +3,16 @@ VERSION  := v0.1.0
 REVISION := $(shell git rev-parse --short HEAD)
 
 SRCS     := *.go core/*.go cmd/*.go runner/*.go runner/**/*.go
+PKGS     := $(shell go list ./...)
 LDFLAGS  := "-X github.com/t-ashula/toubun/core.Version=$(VERSION)"
 
-glide:
-ifeq ($(shell command -v glide 2> /dev/null),)
-	go get -u github.com/Masterminds/glide
+dep:
+ifeq ($(shell command -v dep 2> /dev/null),)
+	go get github.com/golang/dep/cmd/dep
 endif
 
-deps: glide
-	glide install
+deps: dep
+	dep ensure
 
 $(NAME): $(SRCS)
 	go build -ldflags $(LDFLAGS) -o $(NAME)
@@ -19,11 +20,11 @@ $(NAME): $(SRCS)
 all: $(NAME)
 
 test:
-	go test -cover $$(glide nv)
+	go test -cover $(PKGS)
 
 test-cover:
 	echo 'mode: atomic' > cover-all.out
-	$(foreach pkg, $(shell glide nv), \
+	$(foreach pkg, $(PKGS), \
 		go test -coverprofile=cover.out -covermode=atomic -v $(pkg); \
 		tail -n +2 cover.out >> cover-all.out; \
 	)
@@ -37,4 +38,4 @@ force: clean all
 install:
 	go install
 
-.PHONY: force clean test-cover test all deps glide
+.PHONY: force clean test-cover test all deps dep

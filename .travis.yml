@@ -1,5 +1,9 @@
 language: go
 
+go:
+  - 1.9
+  - master
+
 script:
-   - make glide deps
+   - make deps
    - make test
