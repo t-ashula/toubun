@@ -6,7 +6,7 @@ fetch:
     depth: 1
 
 update:
-  module: 'glide'
+  module: 'go:dep'
   config:
 
 publish:
