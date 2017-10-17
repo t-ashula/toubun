@@ -34,4 +34,7 @@ clean:
 
 force: clean all
 
+install:
+	go install
+
 .PHONY: force clean test-cover test all deps glide
