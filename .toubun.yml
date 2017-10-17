@@ -6,7 +6,7 @@ fetch:
     depth: 1
 
 update:
-  module: 'go:dep'
+  module: 'dep'
   config:
 
 publish:

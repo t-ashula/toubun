@@ -1,4 +1,4 @@
-package godep
+package dep
 
 import (
 	"fmt"
@@ -11,39 +11,39 @@ import (
 	"github.com/t-ashula/toubun/runner"
 )
 
-const updaterName = "go:dep"
+const updaterName = "dep"
 
-type godepConfig struct{}
+type depConfig struct{}
 
-type godepUpdater struct {
-	config *godepConfig
+type depUpdater struct {
+	config *depConfig
 }
 
 func init() {
-	runner.RegisterUpdater(updaterName, newGodepUpdater)
+	runner.RegisterUpdater(updaterName, newDepUpdater)
 }
 
-func newGodepUpdater(c *k.ModuleConfig) runner.Runner {
+func newDepUpdater(c *k.ModuleConfig) runner.Runner {
 	cfg := convertUpdaterConfig(c)
-	u := &godepUpdater{config: cfg}
+	u := &depUpdater{config: cfg}
 	return u
 }
 
-func (u *godepUpdater) Name() string {
+func (u *depUpdater) Name() string {
 	return updaterName
 }
 
-func (u *godepUpdater) ValidateConfig() error {
+func (u *depUpdater) ValidateConfig() error {
 	if u.config == nil {
 		return fmt.Errorf("no config should error")
 	}
 	return nil
 }
 
-func (u *godepUpdater) Run(re k.RunEnv) error {
+func (u *depUpdater) Run(re k.RunEnv) error {
 	removeDeps(re)
 
-	err := exec.Command("dep", "ensure").Run()
+	err := exec.Command("dep", "ensure", "-update").Run()
 	if err != nil {
 		log.Printf("failed;[%s]:dep ensure\n", re.CurrentWorkDir())
 		return err
@@ -53,7 +53,7 @@ func (u *godepUpdater) Run(re k.RunEnv) error {
 }
 
 func removeDeps(re k.RunEnv) {
-	lock := filepath.Join(re.CurrentWorkDir(), "Gopkg.toml")
+	lock := filepath.Join(re.CurrentWorkDir(), "Gopkg.lock")
 	_, err := os.Stat(lock)
 	if err == nil {
 		os.Remove(lock)
@@ -65,7 +65,7 @@ func removeDeps(re k.RunEnv) {
 	}
 }
 
-func convertUpdaterConfig(c *k.ModuleConfig) *godepConfig {
-	cfg := &godepConfig{}
+func convertUpdaterConfig(c *k.ModuleConfig) *depConfig {
+	cfg := &depConfig{}
 	return cfg
 }

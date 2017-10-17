@@ -6,6 +6,11 @@ SRCS     := *.go core/*.go cmd/*.go runner/*.go runner/**/*.go
 PKGS     := $(shell go list ./...)
 LDFLAGS  := "-X github.com/t-ashula/toubun/core.Version=$(VERSION)"
 
+all: $(NAME)
+
+$(NAME): $(SRCS)
+	go build -ldflags $(LDFLAGS) -o $(NAME)
+
 dep:
 ifeq ($(shell command -v dep 2> /dev/null),)
 	go get github.com/golang/dep/cmd/dep
@@ -13,11 +18,6 @@ endif
 
 deps: dep
 	dep ensure
-
-$(NAME): $(SRCS)
-	go build -ldflags $(LDFLAGS) -o $(NAME)
-
-all: $(NAME)
 
 test:
 	go test -cover $(PKGS)
