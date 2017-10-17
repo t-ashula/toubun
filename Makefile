@@ -1,4 +1,4 @@
-TARGET   := toubun
+NAME   := toubun
 VERSION  := v0.1.0
 REVISION := $(shell git rev-parse --short HEAD)
 
@@ -8,16 +8,15 @@ LDFLAGS  := "-X github.com/t-ashula/toubun/core.Version=$(VERSION)"
 glide:
 ifeq ($(shell command -v glide 2> /dev/null),)
 	go get -u github.com/Masterminds/glide
-	# curl https://glide.sh/get | sh
 endif
 
 deps: glide
 	glide install
 
-$(TARGET): $(SRCS)
-	go build -ldflags $(LDFLAGS) -o $(TARGET)
+$(NAME): $(SRCS)
+	go build -ldflags $(LDFLAGS) -o $(NAME)
 
-all: $(TARGET)
+all: $(NAME)
 
 test:
 	go test -cover $$(glide nv)
@@ -31,8 +30,8 @@ test-cover:
 	go tool cover -func=cover-all.out
 
 clean:
-	rm -rf $(TARGET) cover-all.out cover.out bin vendor
+	rm -rf $(NAME) cover-all.out cover.out bin vendor
 
 force: clean all
 
-.PHONY: force clean test deps glide
+.PHONY: force clean test-cover test all deps glide
