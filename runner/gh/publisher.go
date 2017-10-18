@@ -98,7 +98,7 @@ func (p *githubPublisher) Run(re k.RunEnv) error {
 
 	// make commit
 	log.Printf("publisher:[%s]:git commit\n", re.CurrentWorkDir())
-	cmd = exec.Command("git", "commit", "-am", p.config.commitMessage)
+	cmd = exec.Command("git", "commit", "-am", fmt.Sprintf("'%s'", p.config.commitMessage))
 	if out, err := cmd.CombinedOutput(); err != nil {
 		log.Printf("publisher:[%s]:%s:failed:%s:%v\n", re.CurrentWorkDir(), cmd.Args, out, err)
 		return err
