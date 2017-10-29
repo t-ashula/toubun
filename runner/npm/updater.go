@@ -64,7 +64,7 @@ func (u *npmUpdater) Run(re k.RunEnv) error {
 
 	args := []string{"update"}
 	if u.config.dev {
-
+		args = append(args, "--dev")
 	}
 	cmd := exec.Command("npm", args...)
 	out, err := cmd.CombinedOutput()
