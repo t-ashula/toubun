@@ -74,11 +74,11 @@ func (u *npmUpdater) Run(re k.RunEnv) error {
 	cmd := exec.Command("npm", args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("updater;[%s]:dep ensure failed;%s;%v\n", re.CurrentWorkDir(), out, err)
+		log.Printf("updater;[%s]:%v failed;%s;%v\n", re.CurrentWorkDir(), cmd.Args, out, err)
 		return err
 	}
 
-	log.Printf("updater;[%s]:dep ensure success;%s\n", re.CurrentWorkDir(), out)
+	log.Printf("updater;[%s]:%v success;%s\n", re.CurrentWorkDir(), cmd.Args, out)
 	return nil
 }
 
