@@ -62,6 +62,11 @@ func (u *npmUpdater) Run(re k.RunEnv) error {
 		os.Remove(shrink)
 	}
 
+	lock := filepath.Join(re.CurrentWorkDir(), "package-lock.json")
+	if _, err := os.Stat(lock); err == nil {
+		os.Remove(lock)
+	}
+
 	args := []string{"update"}
 	if u.config.dev {
 		args = append(args, "--dev")
