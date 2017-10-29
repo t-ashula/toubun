@@ -55,16 +55,19 @@ func (u *npmUpdater) Run(re k.RunEnv) error {
 	module := filepath.Join(re.CurrentWorkDir(), "node_modules")
 	if _, err := os.Stat(module); err == nil {
 		os.RemoveAll(module)
+		log.Printf("updater;[%s]:remove node_modules\n", re.CurrentWorkDir())
 	}
 
 	shrink := filepath.Join(re.CurrentWorkDir(), "npm-shrinkwrap.json")
 	if _, err := os.Stat(shrink); err == nil {
 		os.Remove(shrink)
+		log.Printf("updater;[%s]:remove npm-shirnkwrap.json\n", re.CurrentWorkDir())
 	}
 
 	lock := filepath.Join(re.CurrentWorkDir(), "package-lock.json")
 	if _, err := os.Stat(lock); err == nil {
 		os.Remove(lock)
+		log.Printf("updater;[%s]:remove package-lock.json\n", re.CurrentWorkDir())
 	}
 
 	args := []string{"update"}
