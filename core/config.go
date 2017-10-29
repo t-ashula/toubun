@@ -63,3 +63,12 @@ func NewModuleConfig(yml string) *ModuleConfig {
 	}
 	return &mc
 }
+
+func GetConfigBoolValue(c *ModuleConfig, key string, defaultValue bool) (bool, bool) {
+	value := defaultValue
+	v, ok := c.Config[key]
+	if ok {
+		value, ok = v.(bool)
+	}
+	return value, ok
+}
