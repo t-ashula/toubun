@@ -10,3 +10,8 @@ vendor/
 toubun
 tmp/
 !tmp/.keep
+
+# for emacs
+*~
+\#*\#
+.\#*
