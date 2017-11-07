@@ -93,11 +93,13 @@ func (f *githubFetcher) Run(re k.RunEnv) error {
 
 	// TODO: use go-git package?
 	git := "git"
-	args := []string{"clone"}
+	args := []string{"clone", repositoryURL}
 	if f.config.depth > 0 {
 		args = append(args, "--depth", fmt.Sprintf("%d", f.config.depth))
 	}
-	args = append(args, repositoryURL)
+	if f.config.branch != "" {
+		args = append(args, "--branch", f.config.branch)
+	}
 	args = append(args, cloneDir)
 
 	cmd := exec.Command(git, args...)
