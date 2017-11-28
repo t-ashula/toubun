@@ -76,7 +76,7 @@ func prepareRunEnv() (k.RunEnv, error) {
 	re := k.NewRunEnv()
 
 	td := os.TempDir()
-	err := re.ChangeWorkDir(td, true)
+	err := re.ChangeWorkDir(td, false)
 	if err != nil {
 		return nil, err
 	}
