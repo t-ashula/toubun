@@ -11,7 +11,7 @@ func TestChangeWorkDir(t *testing.T) {
 	nd := os.TempDir() // just, test
 	err := re.ChangeWorkDir(nd, false)
 	if err != nil {
-		t.Fatalf("Chagne dir to %s faile; %v", nd, err)
+		t.Fatalf("Chagne dir to %s failed; %v", nd, err)
 	}
 
 	cd, err := os.Getwd()
@@ -31,7 +31,7 @@ func TestCurrentWorkDir(t *testing.T) {
 	nd := os.TempDir() // just, test
 	err := re.ChangeWorkDir(nd, false)
 	if err != nil {
-		t.Fatalf("Chagne dir to %s faile; %v", nd, err)
+		t.Fatalf("Chagne dir to %s failed; %v", nd, err)
 	}
 
 	cd = re.CurrentWorkDir()
@@ -46,7 +46,7 @@ func TestCleanup(t *testing.T) {
 	nd := os.TempDir() // just, test
 	err := re.ChangeWorkDir(nd, false)
 	if err != nil {
-		t.Fatalf("Chagne dir to %s faile; %v", nd, err)
+		t.Fatalf("Chagne dir to %s failed; %v", nd, err)
 	}
 
 	cd := re.CurrentWorkDir()

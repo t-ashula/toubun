@@ -87,7 +87,7 @@ config:
 	c := k.NewModuleConfig(yml)
 	f := newGithubFetcher(c).(*githubFetcher) //
 	if f == nil {
-		t.Fatal("new ghf faile")
+		t.Fatal("new ghf failed")
 	}
 
 	err := f.ValidateConfig()
