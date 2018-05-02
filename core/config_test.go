@@ -38,7 +38,7 @@ config:
 `)
 	v, ok := GetConfigStringValue(mc, "key", "default")
 	if v != "foobar" {
-		t.Errorf("value hould not 'default' but '%s'", v)
+		t.Errorf("value should not 'default' but '%s'", v)
 	}
 	if !ok {
 		t.Errorf("should ok")
