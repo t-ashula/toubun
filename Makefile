@@ -1,5 +1,5 @@
 NAME   := toubun
-VERSION  := v0.1.0
+VERSION  := v0.1.2
 REVISION := $(shell git rev-parse --short HEAD)
 
 SRCS     := *.go core/*.go cmd/*.go runner/*.go runner/**/*.go
