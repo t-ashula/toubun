@@ -90,7 +90,8 @@ func (p *githubPublisher) Run(re k.RunEnv) error {
 	// changed into new branch
 	log.Printf("publisher:[%s]:git checkout\n", re.CurrentWorkDir())
 	branchName := fmt.Sprintf("toubun/upgrade-%d", time.Now().UnixNano())
-	cmd := exec.Command("git", "checkout", "-b", branchName)
+	args := []string{"checkout", "-b", branchName}
+	cmd := exec.Command("git", args...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		log.Printf("publisher:[%s]:%s:failed:%s:%v\n", re.CurrentWorkDir(), cmd.Args, out, err)
 		return err
@@ -98,7 +99,8 @@ func (p *githubPublisher) Run(re k.RunEnv) error {
 
 	// make commit
 	log.Printf("publisher:[%s]:git commit\n", re.CurrentWorkDir())
-	cmd = exec.Command("git", "commit", "-am", fmt.Sprintf("'%s'", p.config.commitMessage))
+	args = []string{"commit", "-am", fmt.Sprintf("'%s'", p.config.commitMessage)}
+	cmd = exec.Command("git", args...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		log.Printf("publisher:[%s]:%s:failed:%s:%v\n", re.CurrentWorkDir(), cmd.Args, out, err)
 		return err
@@ -109,7 +111,8 @@ func (p *githubPublisher) Run(re k.RunEnv) error {
 	ghHost := p.guessHost()
 	repositoryURL := fmt.Sprintf("https://%s:x-oauth-basic@%s/%s/%s", token, ghHost, owner, repo)
 	log.Printf("publisher:[%s]:git push %s %s\n", re.CurrentWorkDir(), repositoryURL, branchName)
-	cmd = exec.Command("git", "push", repositoryURL, branchName)
+	args = []string{"push", repositoryURL, branchName}
+	cmd = exec.Command("git", args...)
 	if out, err := cmd.CombinedOutput(); err != nil {
 		log.Printf("publisher:[%s]:%s:failed:%s:%v\n", re.CurrentWorkDir(), cmd.Args, out, err)
 		return err
