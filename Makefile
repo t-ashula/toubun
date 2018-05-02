@@ -1,4 +1,4 @@
-NAME   := toubun
+NAME     := toubun
 VERSION  := v0.1.2
 REVISION := $(shell git rev-parse --short HEAD)
 
@@ -36,6 +36,6 @@ clean:
 force: clean all
 
 install:
-	go install
+	touch core/vars.go && go install -ldflags $(LDFLAGS)
 
 .PHONY: force clean test-cover test all deps dep
